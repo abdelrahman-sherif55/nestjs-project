@@ -1,0 +1,7 @@
+{
+  "UPDATED_PROFILE": "تم تحديث الملف الشخصي بنجاح.",
+  "PASSWORD_CHANGED": "تم تغيير كلمة المرور بنجاح.",
+  "INCORRECT_CURRENT_PASSWORD": "كلمة المرور الحالية غير صحيحة.",
+  "PASSWORDS_DO_NOT_MATCH": "كلمات المرور غير متطابقة.",
+  "SAME_CURRENT_NEW_PASSWORD": "كلمة المرور الجديدة لا يمكن أن تكون هي نفسها كلمة المرور الحالية."
+}

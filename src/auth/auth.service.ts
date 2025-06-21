@@ -27,6 +27,7 @@ import { Role } from '../common/enums/roles.enum';
 import { Environment } from '../common/interfaces/environment.interface';
 import { TokensTime } from '../common/constants/tokens-time.constant';
 import { SerializerService } from '../common/serializer.service';
+import { TranslateService } from '../translate/translate.service';
 
 @Injectable()
 export class AuthService {
@@ -38,17 +39,22 @@ export class AuthService {
     private readonly configService: ConfigService<Environment>,
     private readonly jwtService: JwtService,
     private readonly serializerService: SerializerService,
+    private readonly i18n: TranslateService,
   ) {}
 
   public async signup(data: SignupDto, image?: Files) {
     if (data.password !== data.confirmPassword) {
-      throw new BadRequestException('passwords do not match');
+      throw new BadRequestException(
+        this.i18n.translate('auth-service.PASSWORDS_DO_NOT_MATCH'),
+      );
     }
     const existingUser: Users | null = await this.usersModel.findOne({
       $or: [{ username: data.username }, { email: data.email }],
     });
     if (existingUser) {
-      throw new BadRequestException('Username or email already exists');
+      throw new BadRequestException(
+        this.i18n.translate('auth-service.USER_EXISTS'),
+      );
     }
     if (image) data.image = await this.usersService.refactorImage(image);
     const user: UserDocument = await this.usersModel.create(data);
@@ -95,7 +101,9 @@ export class AuthService {
 
   private async checkLoggedUser(data: LoginDto, user?: UserDocument) {
     if (!user || !(await bcrypt.compare(data.password, user.password))) {
-      throw new BadRequestException('Invalid username or password');
+      throw new BadRequestException(
+        this.i18n.translate('auth-service.INVALID_LOGIN'),
+      );
     }
     const accessToken: string = this.createTokensService.AccessToken(user._id);
     const refreshToken: string = this.createTokensService.RefreshToken(
@@ -109,7 +117,9 @@ export class AuthService {
       email: data.email,
     });
     if (!user) {
-      throw new BadRequestException('Invalid email');
+      throw new BadRequestException(
+        this.i18n.translate('auth-service.USER_NOT_FOUND'),
+      );
     }
     const resetCode: string = Math.floor(
       100000 + Math.random() * 900000,
@@ -126,12 +136,17 @@ export class AuthService {
       await user.save({ validateModifiedOnly: true });
     } catch (err) {
       console.log(err);
-      throw new InternalServerErrorException('try again later');
+      throw new InternalServerErrorException(
+        this.i18n.translate('auth-service.TRY_AGAIN'),
+      );
     }
     const token: string = this.createTokensService.ForgetPasswordToken(
       user._id,
     );
-    return { message: 'check your email', resetToken: token };
+    return {
+      message: this.i18n.translate('auth-service.CHECK_EMAIL'),
+      resetToken: token,
+    };
   }
 
   public async verifyCode(decodedToken: any, data: VerifyCodeDto) {
@@ -145,28 +160,39 @@ export class AuthService {
       passwordResetCodeExpires: { $gt: Date.now() },
     });
     if (!user) {
-      throw new BadRequestException('invalid or expired code');
+      throw new BadRequestException(
+        this.i18n.translate('auth-service.EXPIRED_CODE'),
+      );
     }
     user.passwordResetCodeVerify = true;
     await user.save({ validateModifiedOnly: true });
-    return { message: 'code verified' };
+    return { message: this.i18n.translate('auth-service.CODE_VERIFIED') };
   }
 
   public async resetPassword(decodedToken: any, data: ResetPasswordDto) {
-    if (data.password !== data.confirmPassword)
-      throw new BadRequestException('passwords do not match');
+    if (data.password !== data.confirmPassword) {
+      throw new BadRequestException(
+        this.i18n.translate('auth-service.PASSWORDS_DO_NOT_MATCH'),
+      );
+    }
     const user: any = await this.usersModel.findOne({
       _id: decodedToken.id,
       passwordResetCodeVerify: true,
     });
-    if (!user) throw new ForbiddenException("you can't change password");
+    if (!user) {
+      throw new ForbiddenException(
+        this.i18n.translate('auth-service.CAN_NOT_RESET_PASSWORD'),
+      );
+    }
     user.password = data.password;
     user.passwordResetCode = undefined;
     user.passwordResetCodeExpires = undefined;
     user.passwordResetCodeVerify = undefined;
     user.passwordChangedAt = new Date(Date.now());
     await user.save({ validateModifiedOnly: true });
-    return { message: 'password changed successfully' };
+    return {
+      message: this.i18n.translate('auth-service.PASSWORD_RESET_SUCCESS'),
+    };
   }
 
   public async refreshToken(req: Request) {
@@ -177,7 +203,9 @@ export class AuthService {
     ) {
       refreshToken = req.headers.authorization.split(' ')[1];
     } else {
-      throw new UnauthorizedException('Session expired, please log in again');
+      throw new UnauthorizedException(
+        this.i18n.translate('auth-service.SESSION_EXPIRED'),
+      );
     }
 
     let decodedToken: any;
@@ -190,12 +218,16 @@ export class AuthService {
         error instanceof TokenExpiredError ||
         error instanceof JsonWebTokenError
       ) {
-        throw new UnauthorizedException('Session expired, please log in again');
+        throw new UnauthorizedException(
+          this.i18n.translate('auth-service.SESSION_EXPIRED'),
+        );
       }
     }
 
     if (decodedToken.exp - decodedToken.iat !== TokensTime.REFRESH_TOKEN) {
-      throw new UnauthorizedException('Session expired, please log in again');
+      throw new UnauthorizedException(
+        this.i18n.translate('auth-service.SESSION_EXPIRED'),
+      );
     }
     const accessToken: string = this.createTokensService.AccessToken(
       decodedToken.id,

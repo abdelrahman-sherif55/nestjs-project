@@ -1,0 +1,9 @@
+{
+  "NAME": "Invalid name",
+  "NAME_EN": "Invalid English name",
+  "NAME_AR": "Invalid Arabic name",
+  "NAME_LENGTH": "Name must be at least 2 characters long and a maximum of 20 characters long.",
+  "COVER": "Invalid cover",
+  "IMAGE": "Invalid image",
+  "IMAGES": "Invalid images"
+}

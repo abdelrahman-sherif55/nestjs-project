@@ -1,0 +1,7 @@
+{
+  "UPDATED_PROFILE": "Profile updated successfully.",
+  "PASSWORD_CHANGED": "Password changed successfully.",
+  "INCORRECT_CURRENT_PASSWORD": "The current password is incorrect.",
+  "PASSWORDS_DO_NOT_MATCH": "Passwords do not match.",
+  "SAME_CURRENT_NEW_PASSWORD": "The new password cannot be the same as the current password."
+}

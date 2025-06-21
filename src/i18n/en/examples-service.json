@@ -1,0 +1,9 @@
+{
+  "NOT_FOUND": "Example not found",
+  "CREATED": "Example created successfully",
+  "UPDATED": "Example updated successfully",
+  "DELETED": "Example deleted successfully",
+  "IMAGES_ADDED": "Images added successfully",
+  "IMAGE_REMOVED": "Image removed successfully",
+  "FAILED_UPLOAD_IMAGES": "You can only add up to {MAX_IMAGES} images and you have already added {ADDED_IMAGES} images so you can only add ${WANTED_IMAGES} more images."
+}

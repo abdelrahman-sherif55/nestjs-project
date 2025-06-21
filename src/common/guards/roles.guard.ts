@@ -14,6 +14,7 @@ import { Users } from '../../users/users.schema';
 import { Role } from '../enums/roles.enum';
 import { ROLES_KEY } from '../constants/keys.constant';
 import { CustomRequest } from '../interfaces/custom-request.interface';
+import { TranslateService } from '../../translate/translate.service';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -21,6 +22,7 @@ export class RolesGuard implements CanActivate {
     private readonly configService: ConfigService<Environment>,
     private readonly jwtService: JwtService,
     private readonly reflector: Reflector,
+    private readonly i18n: TranslateService,
     @InjectModel(Users.name) private readonly usersModel: Model<Users>,
   ) {}
 
@@ -33,7 +35,7 @@ export class RolesGuard implements CanActivate {
     const { user } = context.switchToHttp().getRequest<CustomRequest>();
     if (!roles.includes(user!.role)) {
       throw new ForbiddenException(
-        'You do not have permission to access this resource.',
+        this.i18n.translate('auth-service.NOT_ALLOWED'),
       );
     }
     return true;

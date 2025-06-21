@@ -3,7 +3,7 @@ import { HydratedDocument } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Examples {
-  @Prop()
+  @Prop({ i18n: true })
   name: string;
 
   @Prop()

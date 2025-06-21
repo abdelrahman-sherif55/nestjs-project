@@ -10,6 +10,7 @@ import { Files } from '../common/types/file.types';
 import { UsersService } from '../users/users.service';
 import { CreateTokensService } from '../auth/create-tokens.service';
 import { SerializerService } from '../common/serializer.service';
+import { TranslateService } from '../translate/translate.service';
 
 @Injectable()
 export class ProfileService {
@@ -18,6 +19,7 @@ export class ProfileService {
     private readonly usersService: UsersService,
     private readonly createTokensService: CreateTokensService,
     private readonly serializerService: SerializerService,
+    private readonly i18n: TranslateService,
   ) {}
 
   public getProfile(user: Users) {
@@ -42,7 +44,7 @@ export class ProfileService {
     );
     const sanitizedProfile: Users = this.serializerService.sanitize(profile);
     return {
-      message: 'Profile updated successfully',
+      message: this.i18n.translate('profile-service.UPDATED_PROFILE'),
       data: new ResponseProfileDto(sanitizedProfile),
     };
   }
@@ -52,14 +54,18 @@ export class ProfileService {
     data: ChangeProfilePasswordDto,
   ) {
     if (!(await bcrypt.compare(data.currentPassword, user.password))) {
-      throw new BadRequestException('Current password is incorrect');
+      throw new BadRequestException(
+        this.i18n.translate('profile-service.INCORRECT_CURRENT_PASSWORD'),
+      );
     }
     if (data.password !== data.confirmPassword) {
-      throw new BadRequestException('New passwords do not match');
+      throw new BadRequestException(
+        this.i18n.translate('profile-service.PASSWORDS_DO_NOT_MATCH'),
+      );
     }
     if (data.password === data.currentPassword) {
       throw new BadRequestException(
-        'New password cannot be the same as the old one',
+        this.i18n.translate('profile-service.SAME_CURRENT_NEW_PASSWORD'),
       );
     }
     const profile: Users | null = await this.usersModel.findByIdAndUpdate(
@@ -75,7 +81,7 @@ export class ProfileService {
       sanitizedProfile._id,
     );
     return {
-      message: 'Password changed successfully',
+      message: this.i18n.translate('profile-service.PASSWORD_CHANGED'),
       accessToken,
       data: new ResponseProfileDto(sanitizedProfile as Users),
     };

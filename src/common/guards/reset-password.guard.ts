@@ -9,12 +9,14 @@ import { JsonWebTokenError, JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { CustomRequest } from '../interfaces/custom-request.interface';
 import { Environment } from '../interfaces/environment.interface';
 import { TokensTime } from '../constants/tokens-time.constant';
+import { TranslateService } from '../../translate/translate.service';
 
 @Injectable()
 export class ResetPasswordGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<Environment>,
+    private readonly i18n: TranslateService,
   ) {}
 
   canActivate(context: ExecutionContext) {
@@ -28,7 +30,9 @@ export class ResetPasswordGuard implements CanActivate {
     ) {
       resetToken = request.headers.authorization.split(' ')[1];
     } else {
-      throw new ForbiddenException("You can't change the password");
+      throw new ForbiddenException(
+        this.i18n.translate('auth-service.CAN_NOT_RESET_PASSWORD'),
+      );
     }
     let decodedToken: any;
     try {
@@ -40,14 +44,18 @@ export class ResetPasswordGuard implements CanActivate {
         error instanceof TokenExpiredError ||
         error instanceof JsonWebTokenError
       ) {
-        throw new ForbiddenException("You can't change the password");
+        throw new ForbiddenException(
+          this.i18n.translate('auth-service.CAN_NOT_RESET_PASSWORD'),
+        );
       }
     }
     if (
       decodedToken.exp - decodedToken.iat !==
       TokensTime.RESET_PASSWORD_TOKEN
     ) {
-      throw new ForbiddenException("You can't change the password");
+      throw new ForbiddenException(
+        this.i18n.translate('auth-service.CAN_NOT_RESET_PASSWORD'),
+      );
     }
     request.decodedToken = decodedToken;
     return true;

@@ -1,0 +1,17 @@
+{
+  "PASSWORDS_DO_NOT_MATCH": "Passwords do not match.",
+  "USER_EXISTS": "username or email already exists.",
+  "INVALID_LOGIN": "Invalid username or password.",
+  "USER_NOT_FOUND": "User not found.",
+  "CHECK_EMAIL": "Please check your email for the verification code.",
+  "EXPIRED_CODE": "The verification code has expired or is invalid.",
+  "CODE_VERIFIED": "The verification code has been successfully verified.",
+  "CAN_NOT_RESET_PASSWORD": "Cannot reset password for this user.",
+  "PASSWORD_RESET_SUCCESS": "Password reset successfully.",
+  "TRY_AGAIN": "Please try again later.",
+  "SESSION_EXPIRED": "Your session has expired. Please log in again.",
+  "NOT_ACTIVE": "Your account is not active.",
+  "NOT_ALLOWED": "You are not allowed to perform this action.",
+  "LOGIN_REQUIRED": "Login is required to access this resource.",
+  "USER_NOT_EXIST": "User does not exist anymore."
+}

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Crud } from '../common/classes/crud';
 import { Examples } from './examples.schema';
 import { InjectModel } from '@nestjs/mongoose';
@@ -16,6 +20,8 @@ import * as sharp from 'sharp';
 import { UpdateExampleDto } from './dtos/update-example.dto';
 import { MaxFileCount } from '../common/constants/file-count.constant';
 import { SerializerService } from '../common/serializer.service';
+import { TranslateService } from '../translate/translate.service';
+import { I18nContext } from 'nestjs-i18n';
 
 @Injectable()
 export class ExamplesService {
@@ -24,15 +30,20 @@ export class ExamplesService {
   constructor(
     @InjectModel(Examples.name) private readonly examplesModel: Model<Examples>,
     private readonly serializerService: SerializerService,
+    private readonly i18n: TranslateService,
   ) {
     this.crud = new Crud<Examples>(examplesModel, Examples.name);
   }
 
   public async getAll(query: any) {
     const data = await this.crud.getAll(query, {});
-    const sanitizedData: Examples[] = this.serializerService.sanitize(
-      data.data,
-    );
+    const localizedData =
+      this.examplesModel.schema.methods.toObjectLocalizedOnly(
+        data.data,
+        I18nContext.current()?.lang,
+      );
+    const sanitizedData: Examples[] =
+      this.serializerService.sanitize(localizedData);
     return {
       ...data,
       data: sanitizedData.map(
@@ -43,9 +54,13 @@ export class ExamplesService {
 
   public async getAllList(query: any) {
     const data = await this.crud.getAllList(query, {});
-    const sanitizedData: Examples[] = this.serializerService.sanitize(
-      data.data,
-    );
+    const localizedData =
+      this.examplesModel.schema.methods.toObjectLocalizedOnly(
+        data.data,
+        I18nContext.current()?.lang,
+      );
+    const sanitizedData: Examples[] =
+      this.serializerService.sanitize(localizedData);
     return {
       ...data,
       data: sanitizedData.map(
@@ -57,9 +72,17 @@ export class ExamplesService {
   public async getOne(id: string) {
     const example: Examples | null = await this.crud.getOne(id);
     if (!example) {
-      throw new NotFoundException('Example not found');
+      throw new NotFoundException(
+        this.i18n.translate('examples-service.NOT_FOUND'),
+      );
     }
-    const sanitizedExample: Examples = this.serializerService.sanitize(example);
+    const localizedExample =
+      this.examplesModel.schema.methods.toObjectLocalizedOnly(
+        example,
+        I18nContext.current()?.lang,
+      );
+    const sanitizedExample: Examples =
+      this.serializerService.sanitize(localizedExample);
     return { data: new ResponseExampleDto(sanitizedExample) };
   }
 
@@ -78,7 +101,7 @@ export class ExamplesService {
     const example: Examples = await this.crud.createOne(data);
     const sanitizedExample: Examples = this.serializerService.sanitize(example);
     return {
-      message: 'Example created successfully',
+      message: this.i18n.translate('examples-service.CREATED'),
       data: new ResponseExampleDto(sanitizedExample),
     };
   }
@@ -93,11 +116,13 @@ export class ExamplesService {
     }
     const example: Examples | null = await this.crud.updateOne(id, data);
     if (!example) {
-      throw new NotFoundException('Example not found');
+      throw new NotFoundException(
+        this.i18n.translate('examples-service.NOT_FOUND'),
+      );
     }
     const sanitizedExample: Examples = this.serializerService.sanitize(example);
     return {
-      message: 'Example updated successfully',
+      message: this.i18n.translate('examples-service.UPDATED'),
       data: new ResponseExampleDto(sanitizedExample),
     };
   }
@@ -105,7 +130,9 @@ export class ExamplesService {
   public async deleteOne(id: string) {
     const example: Examples | null = await this.crud.deleteOne(id);
     if (!example) {
-      throw new NotFoundException('Example not found');
+      throw new NotFoundException(
+        this.i18n.translate('examples-service.NOT_FOUND'),
+      );
     }
     const sanitizedExample: Examples = this.serializerService.sanitize(example);
     if (sanitizedExample.cover) this.deleteOldImage(sanitizedExample.cover);
@@ -114,28 +141,37 @@ export class ExamplesService {
         this.deleteOldImage(image),
       );
     }
-    return { message: 'Example deleted successfully' };
+    return { message: this.i18n.translate('examples-service.DELETED') };
   }
 
   public async addImages(id: string, images: Files[]) {
     let example: Examples | null = await this.crud.getOne(id);
     if (!example) {
-      throw new NotFoundException('Example not found');
+      throw new NotFoundException(
+        this.i18n.translate('examples-service.NOT_FOUND'),
+      );
     }
     let sanitizedExample: Examples = this.serializerService.sanitize(example);
     if (
       sanitizedExample.images.length + images.length >
       MaxFileCount.EXAMPLE_IMAGES
     ) {
-      throw new NotFoundException(
-        `You can only add up to ${MaxFileCount.EXAMPLE_IMAGES} images and you have already added ${sanitizedExample.images.length} images so you can only add ${MaxFileCount.EXAMPLE_IMAGES - sanitizedExample.images.length} more images.`,
+      throw new BadRequestException(
+        this.i18n.translate('examples-service.FAILED_UPLOAD_IMAGES', {
+          args: {
+            MAX_IMAGES: MaxFileCount.EXAMPLE_IMAGES,
+            ADDED_IMAGES: sanitizedExample.images.length,
+            WANTED_IMAGES:
+              MaxFileCount.EXAMPLE_IMAGES - sanitizedExample.images.length,
+          },
+        }),
       );
     }
     const fileNames: string[] = await this.refactorImages(images);
     example = await this.crud.addImages(id, fileNames);
     sanitizedExample = this.serializerService.sanitize(example);
     return {
-      message: 'images added successfully',
+      message: this.i18n.translate('examples-service.IMAGES_ADDED'),
       data: new ResponseExampleDto(sanitizedExample),
     };
   }
@@ -143,12 +179,14 @@ export class ExamplesService {
   public async removeImage(id: string, image: string) {
     const example: Examples | null = await this.crud.removeImage(id, image);
     if (!example) {
-      throw new NotFoundException('Example not found');
+      throw new NotFoundException(
+        this.i18n.translate('examples-service.NOT_FOUND'),
+      );
     }
     const sanitizedExample: Examples = this.serializerService.sanitize(example);
     this.deleteOldImage(image);
     return {
-      message: 'Image removed successfully',
+      message: this.i18n.translate('examples-service.IMAGE_REMOVED'),
       data: new ResponseExampleDto(sanitizedExample),
     };
   }

@@ -6,6 +6,7 @@ import {
 import { NextFunction, Request, Response } from 'express';
 import * as fs from 'fs/promises';
 import { getFolderSize } from '../utils/get-folder-size.util';
+import { TranslateService } from '../../translate/translate.service';
 
 interface FolderSizeOptions {
   folderPath: string;
@@ -14,7 +15,10 @@ interface FolderSizeOptions {
 
 @Injectable()
 export class CheckFolderSizeMiddleware implements NestMiddleware {
-  constructor(private readonly options: FolderSizeOptions) {}
+  constructor(
+    private readonly options: FolderSizeOptions,
+    private readonly i18n: TranslateService,
+  ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
     try {
@@ -26,7 +30,7 @@ export class CheckFolderSizeMiddleware implements NestMiddleware {
 
         if ((folderSize as number) >= maxSizeBytes) {
           throw new PayloadTooLargeException(
-            `You have reached the maximum allowed space of ${maxSizeGB} GB`,
+            this.i18n.translate('common.MAX_SIZE', { args: { maxSizeGB } }),
           );
         }
         next();
@@ -37,6 +41,9 @@ export class CheckFolderSizeMiddleware implements NestMiddleware {
   }
 }
 
-export const checkFolderSizeProvider = (options: FolderSizeOptions) => {
-  return new CheckFolderSizeMiddleware(options);
+export const checkFolderSizeProvider = (
+  options: FolderSizeOptions,
+  i18n: TranslateService,
+) => {
+  return new CheckFolderSizeMiddleware(options, i18n);
 };

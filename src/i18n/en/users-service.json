@@ -1,0 +1,10 @@
+{
+  "PASSWORDS_DO_NOT_MATCH": "Passwords do not match.",
+  "USER_ALREADY_EXISTS": "username or email already exists.",
+  "NOT_FOUND": "User not found",
+  "USER_CREATED": "User created successfully.",
+  "USER_UPDATED": "User updated successfully.",
+  "USER_DELETED": "User deleted successfully.",
+  "PASSWORD_CHANGED": "Password changed successfully.",
+  "NOT_ALLOWED": "You cannot perform this action on yourself"
+}

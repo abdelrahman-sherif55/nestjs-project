@@ -1,0 +1,15 @@
+{
+  "USERNAME_REQUIRED": "Username is required.",
+  "USERNAME_LENGTH": "Username must be at least 2 characters long and a maximum of 20 characters long.",
+  "PASSWORD_REQUIRED": "Password is required.",
+  "PASSWORD_LENGTH": "Password must be at least 6 characters long and a maximum of 20 characters long.",
+  "CONFIRM_PASSWORD_REQUIRED": "Confirm password is required.",
+  "CONFIRM_PASSWORD_LENGTH": "Confirm password must be at least 6 characters long and a maximum of 20 characters long.",
+  "EMAIL_REQUIRED": "Email is required.",
+  "EMAIL_INVALID": "Email is invalid.",
+  "NAME_REQUIRED": "Name is required.",
+  "NAME_LENGTH": "Name must be at least 2 characters long and a maximum of 20 characters long.",
+  "IMAGE_INVALID": "Image is invalid.",
+  "ROLE_INVALID": "Role is invalid.",
+  "ACTIVE_INVALID": "Active status is invalid."
+}

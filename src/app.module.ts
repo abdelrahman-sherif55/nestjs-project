@@ -10,12 +10,14 @@ import { MongoModule } from './mongo/mongo.module';
 import { MailModule } from './mail/mail.module';
 import { ThrottlerRateLimitModule } from './throttler-rate-limit/throttler-rate-limit.module';
 import { AppController } from './app.controller';
+import { TranslateModule } from './translate/translate.module';
 
 @Module({
   imports: [
     ConfigurationModule,
     ServeStaticFoldersModule,
     ThrottlerRateLimitModule,
+    TranslateModule,
     MongoModule,
     CommonModule,
     MailModule,

@@ -17,6 +17,7 @@ import {
   ensureFolderExists,
 } from '../common/upload-files/files-validation-factory';
 import { SerializerService } from '../common/serializer.service';
+import { TranslateService } from '../translate/translate.service';
 
 @Injectable()
 export class UsersService {
@@ -25,6 +26,7 @@ export class UsersService {
   constructor(
     @InjectModel(Users.name) private readonly usersModel: Model<Users>,
     private readonly serializerService: SerializerService,
+    private readonly i18n: TranslateService,
   ) {
     this.crud = new Crud<Users>(usersModel, Users.name);
   }
@@ -41,7 +43,9 @@ export class UsersService {
   public async getOne(id: string) {
     const user: Users | null = await this.crud.getOne(id);
     if (!user) {
-      throw new BadRequestException('user not found');
+      throw new BadRequestException(
+        this.i18n.translate('users-service.NOT_FOUND'),
+      );
     }
     const serializedUser: Users = this.serializerService.sanitize(user);
     return { data: new ResponseUserDto(serializedUser) };
@@ -49,19 +53,23 @@ export class UsersService {
 
   public async createOne(data: CreateUserDto, image?: Files) {
     if (data.password !== data.confirmPassword) {
-      throw new BadRequestException('Passwords do not match');
+      throw new BadRequestException(
+        this.i18n.translate('users-service.PASSWORDS_DO_NOT_MATCH'),
+      );
     }
     const existingUser: Users | null = await this.usersModel.findOne({
       $or: [{ username: data.username }, { email: data.email }],
     });
     if (existingUser) {
-      throw new BadRequestException('Username or email already exists');
+      throw new BadRequestException(
+        this.i18n.translate('users-service.USER_ALREADY_EXISTS'),
+      );
     }
     if (image) data.image = await this.refactorImage(image);
     const user: Users = await this.crud.createOne(data);
     const serializedUser: Users = this.serializerService.sanitize(user);
     return {
-      message: 'user created successfully',
+      message: this.i18n.translate('users-service.USER_CREATED'),
       data: new ResponseUserDto(serializedUser),
     };
   }
@@ -81,11 +89,13 @@ export class UsersService {
     const user: Users | null = await this.crud.updateOne(id, data);
     if (!user) {
       if (image) deleteFile(`${FolderPath.USERS}/${data.image}`);
-      throw new BadRequestException('user not found');
+      throw new BadRequestException(
+        this.i18n.translate('users-service.NOT_FOUND'),
+      );
     }
     const serializedUser: Users = this.serializerService.sanitize(user);
     return {
-      message: 'user updated successfully',
+      message: this.i18n.translate('users-service.USER_UPDATED'),
       data: new ResponseUserDto(serializedUser),
     };
   }
@@ -108,11 +118,13 @@ export class UsersService {
       { new: true },
     );
     if (!user) {
-      throw new BadRequestException('user not found');
+      throw new BadRequestException(
+        this.i18n.translate('users-service.NOT_FOUND'),
+      );
     }
     const serializedUser: Users = this.serializerService.sanitize(user);
     return {
-      message: 'Password changed successfully',
+      message: this.i18n.translate('users-service.PASSWORD_CHANGED'),
       data: new ResponseUserDto(serializedUser),
     };
   }
@@ -121,11 +133,13 @@ export class UsersService {
     this.checkLoggedInUser(id, loggedUser);
     const user: Users | null = await this.crud.deleteOne(id);
     if (!user) {
-      throw new BadRequestException('user not found');
+      throw new BadRequestException(
+        this.i18n.translate('users-service.NOT_FOUND'),
+      );
     }
     const serializedUser: Users = this.serializerService.sanitize(user);
     this.deleteOldImage(serializedUser);
-    return { message: 'User deleted successfully' };
+    return { message: this.i18n.translate('users-service.USER_DELETED') };
   }
 
   public async refactorImage(image: Files) {
@@ -150,7 +164,7 @@ export class UsersService {
   private checkLoggedInUser(id: string, loggedUser: UserDocument) {
     if (id === loggedUser._id.toString()) {
       throw new BadRequestException(
-        'You cannot perform this action on yourself',
+        this.i18n.translate('users-service.NOT_ALLOWED'),
       );
     }
   }

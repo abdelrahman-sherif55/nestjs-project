@@ -12,16 +12,22 @@ import {
   timeout,
   TimeoutError,
 } from 'rxjs';
+import { TranslateService } from '../../translate/translate.service';
 
 @Injectable()
 export class TimeoutInterceptor implements NestInterceptor {
+  constructor(private readonly i18n: TranslateService) {}
+
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
       timeout(60000),
       catchError((err) => {
         if (err instanceof TimeoutError)
           return throwError(
-            () => new RequestTimeoutException('try again later'),
+            () =>
+              new RequestTimeoutException(
+                this.i18n.translate('auth-service.TRY_AGAIN'),
+              ),
           );
         return throwError(() => err);
       }),

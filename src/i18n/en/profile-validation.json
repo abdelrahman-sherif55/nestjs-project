@@ -1,0 +1,4 @@
+{
+  "CURRENT_PASSWORD_REQUIRED": "Current password is required.",
+  "CURRENT_PASSWORD_LENGTH": "Current password must be at least 6 characters long and a maximum of 20 characters long."
+}

@@ -42,6 +42,8 @@
     "magic-bytes.js": "^1.12.1",
     "mime-types": "^3.0.1",
     "mongoose": "^8.16.0",
+    "mongoose-i18n-localize": "^0.3.0",
+    "nestjs-i18n": "^10.5.1",
     "nodemailer": "^7.0.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",

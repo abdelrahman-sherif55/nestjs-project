@@ -15,6 +15,7 @@ import { IS_PUBLIC_KEY } from '../constants/keys.constant';
 import { CustomRequest } from '../interfaces/custom-request.interface';
 import { TokensTime } from '../constants/tokens-time.constant';
 import { SerializerService } from '../serializer.service';
+import { TranslateService } from '../../translate/translate.service';
 
 @Injectable()
 export class ProtectRoutesGuard implements CanActivate {
@@ -23,6 +24,7 @@ export class ProtectRoutesGuard implements CanActivate {
     private readonly jwtService: JwtService,
     private readonly reflector: Reflector,
     private readonly serializerService: SerializerService,
+    private readonly i18n: TranslateService,
     @InjectModel(Users.name) private readonly usersModel: Model<Users>,
   ) {}
 
@@ -44,7 +46,9 @@ export class ProtectRoutesGuard implements CanActivate {
     ) {
       token = request.headers.authorization.split(' ')[1];
     } else {
-      throw new UnauthorizedException('Please log in to continue');
+      throw new UnauthorizedException(
+        this.i18n.translate('auth-service.LOGIN_REQUIRED'),
+      );
     }
     let decodedToken: any;
     try {
@@ -56,19 +60,23 @@ export class ProtectRoutesGuard implements CanActivate {
         error instanceof TokenExpiredError ||
         error instanceof JsonWebTokenError
       ) {
-        throw new UnauthorizedException('Session expired, please log in again');
+        throw new UnauthorizedException(
+          this.i18n.translate('auth-service.SESSION_EXPIRED'),
+        );
       }
     }
     if (decodedToken.exp - decodedToken.iat !== TokensTime.ACCESS_TOKEN) {
       throw new UnauthorizedException(
-        'Session time mismatch, please log in again',
+        this.i18n.translate('auth-service.SESSION_EXPIRED'),
       );
     }
     const user: UserDocument | null = await this.usersModel.findById(
       decodedToken.id,
     );
     if (!user) {
-      throw new UnauthorizedException('User does not exist anymore');
+      throw new UnauthorizedException(
+        this.i18n.translate('auth-service.USER_NOT_EXIST', {}),
+      );
     }
     if (user.passwordChangedAt) {
       const changedPasswordTime: number = Math.trunc(
@@ -76,7 +84,7 @@ export class ProtectRoutesGuard implements CanActivate {
       );
       if (changedPasswordTime > decodedToken.iat) {
         throw new UnauthorizedException(
-          'Password changed, please log in again',
+          this.i18n.translate('auth-service.SESSION_EXPIRED'),
         );
       }
     }

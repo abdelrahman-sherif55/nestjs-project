@@ -7,33 +7,59 @@ import {
   Length,
 } from 'class-validator';
 import { Role } from '../../common/enums/roles.enum';
+import { i18nValidationMessage } from 'nestjs-i18n';
 
 export class CreateUserDto {
-  @Length(2, 20, { message: 'username length between 2,20' })
-  @IsString({ message: 'username required' })
+  @Length(2, 20, {
+    message: i18nValidationMessage('users-validation.USERNAME_LENGTH'),
+  })
+  @IsString({
+    message: i18nValidationMessage('users-validation.USERNAME_REQUIRED'),
+  })
   username: string;
 
-  @IsEmail({}, { message: 'Invalid Email' })
-  @IsNotEmpty({ message: 'Email required' })
+  @IsEmail(
+    {},
+    { message: i18nValidationMessage('users-validation.EMAIL_INVALID') },
+  )
+  @IsNotEmpty({
+    message: i18nValidationMessage('users-validation.EMAIL_REQUIRED'),
+  })
   email: string;
 
-  @Length(2, 20, { message: 'name length between 2,20' })
-  @IsString({ message: 'name required' })
+  @Length(2, 20, {
+    message: i18nValidationMessage('users-validation.NAME_LENGTH'),
+  })
+  @IsString({
+    message: i18nValidationMessage('users-validation.NAME_REQUIRED'),
+  })
   name: string;
 
-  @IsString({ message: 'Invalid image' })
+  @IsString({
+    message: i18nValidationMessage('users-validation.IMAGE_INVALID'),
+  })
   @IsOptional()
   image: string;
 
-  @IsEnum(Role, { message: 'Invalid role' })
+  @IsEnum(Role, {
+    message: i18nValidationMessage('users-validation.ROLE_INVALID'),
+  })
   @IsOptional()
   role: Role;
 
-  @Length(6, 20, { message: 'password length between 6,20' })
-  @IsString({ message: 'password required' })
+  @Length(6, 20, {
+    message: 'i18nValidationMessage.users-validation.PASSWORD_LENGTH',
+  })
+  @IsString({
+    message: i18nValidationMessage('users-validation.PASSWORD_REQUIRED'),
+  })
   password: string;
 
-  @Length(6, 20, { message: 'confirm password length between 6,20' })
-  @IsString({ message: 'confirm password required' })
+  @Length(6, 20, {
+    message: 'i18nValidationMessage.users-validation.CONFIRM_PASSWORD_LENGTH',
+  })
+  @IsString({
+    message: 'i18nValidationMessage.users-validation.CONFIRM_PASSWORD_REQUIRED',
+  })
   confirmPassword: string;
 }
