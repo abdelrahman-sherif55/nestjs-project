@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Crud } from '../common/classes/crud';
 import { Examples } from './examples.schema';
 import { InjectModel } from '@nestjs/mongoose';
@@ -127,7 +131,7 @@ export class ExamplesService {
       sanitizedExample.images.length + images.length >
       MaxFileCount.EXAMPLE_IMAGES
     ) {
-      throw new NotFoundException(
+      throw new BadRequestException(
         `You can only add up to ${MaxFileCount.EXAMPLE_IMAGES} images and you have already added ${sanitizedExample.images.length} images so you can only add ${MaxFileCount.EXAMPLE_IMAGES - sanitizedExample.images.length} more images.`,
       );
     }
